@@ -1,0 +1,17 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "java",
+            "name": "Калькулятор металлурга — запуск",
+            "request": "launch",
+            "mainClass": "metallurgy.Main"
+        },
+        {
+            "type": "java",
+            "name": "Проверка программы — тесты",
+            "request": "launch",
+            "mainClass": "metallurgy.Tests"
+        }
+    ]
+}
