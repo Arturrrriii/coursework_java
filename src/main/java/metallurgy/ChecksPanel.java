@@ -1,0 +1,14 @@
+package metallurgy;
+import javax.swing.*;
+import java.awt.*;
+import java.util.Locale;
+import java.util.function.Supplier;
+/** Дополнительные данные и проверка геометрии по струе и газовыделению. */
+public class ChecksPanel extends JPanel {
+    public ChecksPanel(Supplier<ConverterCalculator.Input> input){super(new BorderLayout(8,8));setBorder(BorderFactory.createEmptyBorder(12,12,12,12));
+        String[] labels={"Скорость на выходе сопла, м/с","Диаметр сопла, м","Расстояние до ванны, м","Температура струи, К","Температура газа в конвертере, К","Плотность струи, кг/м³","Наклон сопла, °","CO, м³/т","CO₂, м³/т","Расход O₂, м³/т","Скорость пузырьков, м/с","Коэффициент неравномерности"};
+        String[] values={"490","0.0554","1.3","293","2000","1.43","16","48.6","6.1","48","1","1.7"};
+        JTextField[] fields=new JTextField[labels.length];JPanel form=new JPanel(new GridLayout(0,2,5,5));for(int i=0;i<labels.length;i++){form.add(new JLabel(labels[i]));fields[i]=new JTextField(values[i]);form.add(fields[i]);}
+        JTextArea out=new JTextArea("Введите исходные данные, затем нажмите «Проверить».\n\nЧисла по умолчанию — из примера для садки 200 т,\nих нужно заменить для другого режима.");out.setEditable(false);out.setLineWrap(true);out.setWrapStyleWord(true);JButton run=new JButton("Проверить");run.addActionListener(e->{try{double[] p=new double[fields.length];for(int i=0;i<p.length;i++)p[i]=Double.parseDouble(fields[i].getText().trim().replace(',','.'));var x=input.get();var geo=ConverterCalculator.calculate(x);var r=ProcessChecks.calculate(x,geo,new ProcessChecks.Input(p[0],p[1],p[2],p[3],p[4],p[5],p[6],p[7],p[8],p[9],p[10],p[11]));out.setText(String.format(Locale.US,"Скорость струи: %.3f м/с\nДиаметр струи: %.3f м\nГлубина проникновения: %.3f м\nС учетом наклона: %.3f м\nМин. глубина с защитным слоем: %.3f м\nМакс. глубина по перемешиванию: %.3f м\nЗаданная глубина %.3f м: %s\n\nВремя продувки: %.3f мин\nМакс. скорость газовыделения: %.3f м³/с\nМин. высота цилиндра: %.3f м\nРасчетная высота цилиндра: %.3f м\nУсловие hц ≥ hц min: %s\n\nТакже сравните глубину с ограничением по прочности днища 2 м. Эти проверки используют введенные, а не рассчитанные состав и объемы газов.",r.speed(),r.jetDiameter(),r.penetration(),r.inclinedPenetration(),r.minDepth(),r.maxMixDepth(),x.depth(),x.depth()>=r.minDepth()&&x.depth()<=r.maxMixDepth()?"в пределах":"НЕ выполняется",r.blowTime(),r.maxGasFlow(),r.minCylinder(),geo.cylinderHeight(),geo.cylinderHeight()>=r.minCylinder()?"выполняется":"НЕ выполняется"));}catch(Exception ex){JOptionPane.showMessageDialog(this,ex.getMessage(),"Ошибка",JOptionPane.ERROR_MESSAGE);}});form.add(run);JPanel left=new JPanel(new BorderLayout());left.add(form,BorderLayout.NORTH);add(left,BorderLayout.WEST);add(new JScrollPane(out),BorderLayout.CENTER);
+    }
+}
